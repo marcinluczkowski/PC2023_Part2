@@ -78,7 +78,15 @@ namespace PC2023_Part2
                     var line22 = new Line(axis.From, axis.To);
                     line21.Transform(t21);
                     line22.Transform(t22);
-                    bc.brep = Brep.CreateFromCornerPoints(line21.To, line21.From, line22.From, line22.To, 0.00001);//adding brep
+                    var pl = new Polyline(
+                        new List<Point3d>()
+                        {line21.From, line21.To, line22.To, line22.From, line21.From  }
+                        );
+
+                    Curve section = pl.ToNurbsCurve();
+                    Line rail = new Line(line21.From, new Point3d(line21.FromX, line21.FromY, line21.FromZ + height));
+                    var brps = Brep.CreateFromSweep(rail.ToNurbsCurve(), section, true, 0.00001);
+                    bc.brep = brps[0];
                 }
                 nbcs.Add(bc);  //adding new instance to the list
             }
