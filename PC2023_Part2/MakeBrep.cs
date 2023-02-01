@@ -44,31 +44,46 @@ namespace PC2023_Part2
             List<BeamClass> bcs = new List<BeamClass>();
             DA.GetDataList(0, bcs);
 
+            List<BeamClass> nbcs = new List<BeamClass>(); //declare a new list of Beam class objects
             double height = 100;
             double thickness = 10;
             for (int i = 0; i < bcs.Count; i++)
             {
-                BeamClass bc = bcs[i];
-
-                Line axis = bc.axis;
+                BeamClass bc = new BeamClass(bcs[i].name, bcs[i].id, bcs[i].axis); //create new instance of the class
+                Line axis = bc.axis;  //take the line of the beamClass object
 
                 if (bc.name == "horizontalBeam")
                 {
-                    var t1 = Transform.Translation(new Vector3d(0, 1, 0));
-                    Line line1 = new Line(axis.From, axis.To);
-                    line1.Transform(t1);
-                    bc.brep = Brep.CreateFromCornerPoints(axis.To, axis.From, line1.From, line1.To, 0.00001);
+                    var t11 = Transform.Translation(new Vector3d(0, -thickness/2 , 0));
+                    var t12 = Transform.Translation(new Vector3d(0, thickness / 2, 0));
+                    Line line11 = new Line(axis.From, axis.To);
+                    Line line12 = new Line(axis.From, axis.To);
+                    line11.Transform(t11);
+                    line12.Transform(t12);
+                    var pl = new Polyline(
+                        new List<Point3d>()
+                        {line11.From, line11.To, line12.To, line12.From, line11.From  }
+                        );
+
+                    Curve section = pl.ToNurbsCurve();
+                    Line rail = new Line(line11.From, new Point3d(line11.FromX, line11.FromY, line11.FromZ + height));
+                    var brps = Brep.CreateFromSweep(rail.ToNurbsCurve(), section, true, 0.00001);
+                    bc.brep = brps[0];//Brep.CreateFromCornerPoints(line11.To, line11.From, line12.From, line12.To, 0.00001); //adding brep
                 }
                 else if (bc.name == "verticalBeam")
                 {
-                    var t2 = Transform.Translation(new Vector3d(1, 0, 0));
-                    Line line2 = new Line(axis.From, axis.To);
-                    line2.Transform(t2);
-                    bc.brep = Brep.CreateFromCornerPoints(axis.To, axis.From, line2.From, line2.To, 0.00001);
+                    var t21 = Transform.Translation(new Vector3d(-thickness / 2, 0, 0));
+                    var t22 = Transform.Translation(new Vector3d(thickness / 2, 0, 0));
+                    var line21 = new Line(axis.From, axis.To);
+                    var line22 = new Line(axis.From, axis.To);
+                    line21.Transform(t21);
+                    line22.Transform(t22);
+                    bc.brep = Brep.CreateFromCornerPoints(line21.To, line21.From, line22.From, line22.To, 0.00001);//adding brep
                 }
+                nbcs.Add(bc);  //adding new instance to the list
             }
 
-            DA.SetDataList(0, bcs);
+            DA.SetDataList(0, nbcs);
         }
 
         /// <summary>
