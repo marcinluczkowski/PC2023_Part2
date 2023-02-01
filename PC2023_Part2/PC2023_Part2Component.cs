@@ -39,6 +39,7 @@ namespace PC2023_Part2
             pManager.AddCurveParameter("vcurves", "vcs", "vertical curves", GH_ParamAccess.list); //0
             pManager.AddCurveParameter("hcurves", "hcs", "horizontal curves", GH_ParamAccess.list); //1
             pManager.AddPointParameter("ipoints", "ipts","intersection points", GH_ParamAccess.list) ; //2
+            pManager.AddGenericParameter("beams","bcs","beamClass objects",GH_ParamAccess.list); //3
         }
 
         /// <summary>
@@ -56,27 +57,48 @@ namespace PC2023_Part2
             //use our method
             getVerticalHorizontalCurves(crvs, out hcrvs, out vcrvs);
 
+            List<Point3d> ipts = getIntBetweenHandV(vcrvs, hcrvs);
+
+            List<BeamClass> bcs = new List<BeamClass>();
+            int idv = 0;
+            foreach (var v in vcrvs)
+            {
+                BeamClass bc = new BeamClass("verticalBeam",idv, new Line(v.PointAtStart, v.PointAtEnd));
+                idv++;
+                bcs.Add(bc);
+            }
+            int idh = 0;
+            foreach (var h in hcrvs)
+            {
+                BeamClass bc = new BeamClass("horizontalBeam", idh, new Line(h.PointAtStart, h.PointAtEnd));
+                idh++;
+                bcs.Add(bc);
+            }
+
+            DA.SetDataList(0, vcrvs);
+            DA.SetDataList(1, hcrvs);
+            DA.SetDataList(2, ipts);
+            DA.SetDataList(3, bcs);
+        }
+
+        //methods
+        List<Point3d> getIntBetweenHandV(List<Curve> vcrvs, List<Curve> hcrvs)
+        {
             List<Point3d> ipts = new List<Point3d>();
             foreach (var vc in vcrvs)
             {
                 foreach (var hc in hcrvs)
                 {
-                    var inter = Intersection.CurveCurve(vc,hc,0.0001,0.0001);
+                    var inter = Intersection.CurveCurve(vc, hc, 0.0001, 0.0001);
                     foreach (var i in inter)
                     {
                         ipts.Add(i.PointA);
                     }
                 }
             }
-
-
-            DA.SetDataList(0, vcrvs);
-            DA.SetDataList(1, hcrvs);
-            DA.SetDataList(2, ipts);
+            return ipts;
         }
 
-
-        //methods
         void getVerticalHorizontalCurves(List<Curve> icrvs, out List<Curve> hcrvs, out List<Curve> vcrvs)
         {
             List<Curve> hcrvs1 = new List<Curve>();
