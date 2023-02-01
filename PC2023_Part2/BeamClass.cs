@@ -15,6 +15,10 @@ namespace PC2023_Part2
         public string name;
         public int id;
 
+        public List<Point3d> intersectionPoints;
+        public List<DetailClass> details;
+
+
         //constructors
         public BeamClass()
         { 
