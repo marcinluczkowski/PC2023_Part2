@@ -25,6 +25,7 @@ namespace PC2023_Part2
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("beams","bs","list of beamClass objects",GH_ParamAccess.list);
+            pManager.AddIntegerParameter("endType", "et", "type of the detail at the end of beam", GH_ParamAccess.list, 0);
         }
 
         /// <summary>
@@ -42,11 +43,14 @@ namespace PC2023_Part2
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             List<BeamClass> bcs = new List<BeamClass>();
+            List<int> types = new List<int>();
             DA.GetDataList(0, bcs);
+            DA.GetDataList(1, types);
 
             List<BeamClass> nbcs = new List<BeamClass>(); //declare a new list of Beam class objects
             double height = 100;
             double thickness = 10;
+            
             for (int i = 0; i < bcs.Count; i++)
             {
                 BeamClass bc = new BeamClass(bcs[i].name, bcs[i].id, bcs[i].axis); //create new instance of the class
@@ -69,6 +73,11 @@ namespace PC2023_Part2
                     Line rail = new Line(line11.From, new Point3d(line11.FromX, line11.FromY, line11.FromZ + height));
                     var brps = Brep.CreateFromSweep(rail.ToNurbsCurve(), section, true, 0.00001);
                     bc.brep = brps[0];//Brep.CreateFromCornerPoints(line11.To, line11.From, line12.From, line12.To, 0.00001); //adding brep
+                    DetailClass d1 = new DetailClass("endHBeamDetail", i, axis.From);
+                    DetailClass d2 = new DetailClass("endHBeamDetail", i, axis.To);
+                    List<DetailClass> ds = new List<DetailClass>() {d1,d2};
+                    bc.details = ds;
+
                 }
                 else if (bc.name == "verticalBeam")
                 {
@@ -87,6 +96,10 @@ namespace PC2023_Part2
                     Line rail = new Line(line21.From, new Point3d(line21.FromX, line21.FromY, line21.FromZ + height));
                     var brps = Brep.CreateFromSweep(rail.ToNurbsCurve(), section, true, 0.00001);
                     bc.brep = brps[0];
+                    DetailClass d1 = new DetailClass("endVBeamDetail", i, axis.From);
+                    DetailClass d2 = new DetailClass("endVBeamDetail", i, axis.To);
+                    List<DetailClass> ds = new List<DetailClass>() { d1, d2 };
+                    bc.details = ds;
                 }
                 nbcs.Add(bc);  //adding new instance to the list
             }

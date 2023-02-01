@@ -6,13 +6,13 @@ using Rhino.Geometry;
 
 namespace PC2023_Part2
 {
-    public class DeconstructBeam : GH_Component
+    public class DeconstructDetail : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the DeconstructBeam class.
+        /// Initializes a new instance of the DeconstructDetail class.
         /// </summary>
-        public DeconstructBeam()
-          : base("DeconstructBeam", "decBeam",
+        public DeconstructDetail()
+          : base("DeconstructDetail", "Nickname",
               "Description",
               "NTNU", "PC2023_Part2")
         {
@@ -23,7 +23,7 @@ namespace PC2023_Part2
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("beam","b","beamClass object", GH_ParamAccess.item);
+            pManager.AddGenericParameter("detail", "d","",GH_ParamAccess.item) ;
         }
 
         /// <summary>
@@ -32,10 +32,9 @@ namespace PC2023_Part2
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddTextParameter("name","n","",GH_ParamAccess.item);
-            pManager.AddIntegerParameter("id", "i", "", GH_ParamAccess.item);
-            pManager.AddLineParameter("axis", "a", "", GH_ParamAccess.item);
-            pManager.AddBrepParameter("brep", "b", "", GH_ParamAccess.item);
-            pManager.AddGenericParameter("details", "ds", "", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("type", "t", "", GH_ParamAccess.item);
+            pManager.AddPointParameter("point", "pt", "", GH_ParamAccess.item);
+            pManager.AddBrepParameter("brep", "br", "", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -44,35 +43,29 @@ namespace PC2023_Part2
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            BeamClass bc = new BeamClass();
-            DA.GetData(0, ref bc);
+            DetailClass dc = new DetailClass();
+            DA.GetData(0, ref dc);
 
             string n = "name";
-            if (bc.name != null)
-                n = bc.name;
+            if (dc.name != null)
+                n = dc.name;
 
             int i = 0;
-            if (bc.id != null)
-                i = bc.id;
+            if (dc.id != null)
+                i = dc.id;
 
-            Line l = new Line();
-            if (bc.axis != null)
-                l = bc.axis;
+            Point3d p = new Point3d();
+            if (dc.location != null)
+                p = dc.location;
 
             Brep b = new Brep();
-            if (bc.brep != null)
-                b = bc.brep;
+            if (dc.brep != null)
+                b = dc.brep;
 
-            List<DetailClass> ds = new List<DetailClass>();
-            if (bc.details != null)
-                ds = bc.details;
-
-            DA.SetData(0,n);
+            DA.SetData(0, n);
             DA.SetData(1, i);
-            DA.SetData(2, l);
+            DA.SetData(2, p);
             DA.SetData(3, b);
-            DA.SetDataList(4, ds);
-
         }
 
         /// <summary>
@@ -93,7 +86,7 @@ namespace PC2023_Part2
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("DC45B7DA-35DB-463F-9842-403FBC2B865C"); }
+            get { return new Guid("E63990AC-E15D-4468-A0A2-1CA61396E5EE"); }
         }
     }
 }

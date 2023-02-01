@@ -17,6 +17,14 @@ namespace PC2023_Part2
         public Point3d location;
 
         //constructor 
+        public DetailClass()
+        { }
 
+        public DetailClass(string _name, int _id , Point3d _location)
+        { 
+         name = _name;
+            id = _id;
+            location = _location;
+        }
     }
 }
